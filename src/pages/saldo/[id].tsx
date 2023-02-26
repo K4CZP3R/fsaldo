@@ -18,7 +18,7 @@ import {
   Button,
 } from "@tremor/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import SaldoEntryRow from "@/components/saldo-entry-row/saldo-entry-row.component";
 
@@ -28,10 +28,14 @@ export default function SaldoId() {
 
   const [saldo, setSaldo] = useState<Saldo>();
 
-  useEffect(() => {
+  const fetchSaldo = useCallback(() => {
     if (!id) return;
     getSaldo(id.toString()).then((saldo) => setSaldo(saldo));
   }, [id]);
+
+  useEffect(() => {
+    fetchSaldo();
+  }, [fetchSaldo]);
 
   return (
     <Shell title="Saldo" text={saldo?.name ?? ""}>
@@ -44,13 +48,27 @@ export default function SaldoId() {
               <TableHeaderCell>Name</TableHeaderCell>
               <TableHeaderCell>Amount</TableHeaderCell>
               <TableHeaderCell>Date</TableHeaderCell>
+
               <TableHeaderCell>Saldo</TableHeaderCell>
               <TableHeaderCell>Edit</TableHeaderCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {(saldo?.saldoEntry ?? []).map((item) => (
-              <SaldoEntryRow key={item.id} item={item} />
+              <SaldoEntryRow
+                onChange={() => fetchSaldo()}
+                saldoId={saldo!.id}
+                key={item.id}
+                item={item}
+              >
+                <TableCell>
+                  <Badge
+                    text={item.amount.toString()}
+                    color="emerald"
+                    icon={ArrowRightIcon}
+                  />
+                </TableCell>
+              </SaldoEntryRow>
             ))}
           </TableBody>
         </Table>
