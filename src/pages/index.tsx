@@ -19,17 +19,17 @@ import {
 import { useRouter } from "next/router";
 
 const cards = [
-  {
-    title: "Create a new saldo item",
-    text: "Create a new saldo item",
-    icon: HomeIcon,
-    path: "/new",
-  },
+  // {
+  //   title: "Create a new saldo item",
+  //   text: "Create a new saldo item",
+  //   icon: HomeIcon,
+  //   path: "/new",
+  // },
   {
     title: "View all saldo items",
     text: "View all saldo items",
     icon: HomeIcon,
-    path: "/all",
+    path: "/saldo",
   },
 ];
 
