@@ -9,9 +9,13 @@ import {
 } from "@tremor/react";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { useCallback, useEffect, useState } from "react";
+import { updateSaldoEntry } from "@/helpers/client-side.helper";
 
 export type SaldoEntryRowProps = {
+  saldoId: string;
   item: SaldoEntry;
+  onChange?: () => void;
+  children?: React.ReactNode;
 };
 
 export default function SaldoEntryRow(props: SaldoEntryRowProps) {
@@ -19,11 +23,19 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
   const [amount, setAmount] = useState(props.item.amount);
   const [editMode, setEditMode] = useState(false);
 
-  const callb = useCallback(() => {
-    console.log("Test!", name, amount);
+  useEffect(() => {
+    setName(props.item.name);
+    setAmount(props.item.amount);
+  }, [props.item]);
 
-    props.item.name = name;
-    props.item.amount = amount;
+  const callb = useCallback(() => {
+    updateSaldoEntry(props.saldoId, props.item.id, { name, amount })
+      .then((res) => {
+        props.onChange?.();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, [name, amount, props]);
 
   if (editMode) {
@@ -46,13 +58,7 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
         <TableCell>
           <Text>{props.item.createdAt.toString()}</Text>
         </TableCell>
-        <TableCell>
-          <Badge
-            text={props.item.amount.toString()}
-            color="emerald"
-            icon={ArrowRightIcon}
-          />
-        </TableCell>
+        {props.children}
         <TableCell>
           <Button
             onClick={() => {
@@ -69,20 +75,14 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
   } else {
     return (
       <TableRow>
-        <TableCell>{props.item.name}</TableCell>
+        <TableCell>{name}</TableCell>
         <TableCell>
-          <Text>{props.item.amount}</Text>
+          <Text>{amount}</Text>
         </TableCell>
         <TableCell>
           <Text>{props.item.createdAt.toString()}</Text>
         </TableCell>
-        <TableCell>
-          <Badge
-            text={props.item.amount.toString()}
-            color="emerald"
-            icon={ArrowRightIcon}
-          />
-        </TableCell>
+        {props.children}
         <TableCell>
           <Button
             onClick={() => setEditMode(true)}
