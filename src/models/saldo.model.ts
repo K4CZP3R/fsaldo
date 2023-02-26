@@ -10,5 +10,10 @@ export type SaldoEntry = {
     name: string;
     amount: number;
     createdAt: Date;
+}
 
+export type SaldoEntryUpdate = {
+    name?: string;
+    amount?: number;
+    createdAt?: Date;
 }

@@ -1,5 +1,5 @@
 import { ApiResponse } from "@/models/api-response.interface";
-import { Saldo, SaldoEntry } from "@/models/saldo.model";
+import { Saldo, SaldoEntry, SaldoEntryUpdate } from "@/models/saldo.model";
 
 export async function getSaldos(): Promise<Saldo[] | undefined> {
     const response = await getRequest<Saldo[]>("/api/saldo");
@@ -21,7 +21,7 @@ export async function getSaldoEntry(saldoId: string, entryId: string): Promise<S
     return response.data;
 }
 
-export async function updateSaldoEntry(saldoId: string, entryId: string, entry: SaldoEntry): Promise<SaldoEntry | undefined> {
+export async function updateSaldoEntry(saldoId: string, entryId: string, entry: SaldoEntryUpdate): Promise<SaldoEntry | undefined> {
     const response = await dataRequest<SaldoEntry>(`/api/saldo/${saldoId}/entry/${entryId}`, { saldoEntry: entry }, "PUT");
     return response.data;
 }
