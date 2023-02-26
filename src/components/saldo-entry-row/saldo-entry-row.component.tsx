@@ -26,11 +26,6 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
     props.item.amount = amount;
   }, [name, amount, props]);
 
-  //   useEffect(() => {
-  //     props.item.name = name;
-  //     props.item.amount = amount;
-  //   }, [name, amount, props]);
-
   if (editMode) {
     return (
       <TableRow>
