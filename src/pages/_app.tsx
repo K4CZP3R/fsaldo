@@ -1,6 +1,9 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
+import "@tremor/react/dist/esm/tremor.css";
+import { Subtitle } from "@tremor/react";
+import Header from "@/components/header/header.component";
 
 export default function App({
   Component,
@@ -8,7 +11,19 @@ export default function App({
 }: AppProps) {
   return (
     <SessionProvider session={session}>
-      <Component {...pageProps} />
+      <div className="container">
+        <div className="box box-1">
+          <Header></Header>
+        </div>
+
+        <main className="box box-2">
+          <Component {...pageProps} />
+        </main>
+
+        <div className="box box-3">
+          <Subtitle>By K4CZP3R</Subtitle>
+        </div>
+      </div>
     </SessionProvider>
   );
 }
