@@ -1,6 +1,6 @@
 import Shell from "@/components/shell/shell.component";
 import { getSaldo } from "@/helpers/client-side.helper";
-import { Saldo } from "@/models/saldo.model";
+import { Saldo, SaldoEntry } from "@/models/saldo.model";
 import {
   Card,
   Text,
@@ -28,9 +28,22 @@ export default function SaldoId() {
 
   const [saldo, setSaldo] = useState<Saldo>();
 
+  const [entries, setEntries] = useState<SaldoEntry[]>([]);
+
   const fetchSaldo = useCallback(() => {
     if (!id) return;
-    getSaldo(id.toString()).then((saldo) => setSaldo(saldo));
+    getSaldo(id.toString()).then((saldo) => {
+      setSaldo(saldo);
+
+      if (saldo?.saldoEntry) {
+        saldo.saldoEntry.sort((a, b) => {
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        });
+        setEntries(saldo.saldoEntry);
+      }
+    });
   }, [id]);
 
   useEffect(() => {
@@ -54,7 +67,7 @@ export default function SaldoId() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {(saldo?.saldoEntry ?? []).map((item) => (
+            {entries.map((item) => (
               <SaldoEntryRow
                 onChange={() => fetchSaldo()}
                 saldoId={saldo!.id}
