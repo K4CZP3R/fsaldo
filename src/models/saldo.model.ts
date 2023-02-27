@@ -10,7 +10,7 @@ export type SaldoEntry = {
     id: string;
     name: string;
     amount: number;
-    createdAt: Date;
+    createdAt: string;
 }
 
 export type SaldoEntryUpdate = {
