@@ -4,6 +4,9 @@ import { SessionProvider } from "next-auth/react";
 import "@tremor/react/dist/esm/tremor.css";
 import { Subtitle } from "@tremor/react";
 import Header from "@/components/header/header.component";
+import Modal from "react-modal";
+
+Modal.setAppElement("#__next");
 
 export default function App({
   Component,
