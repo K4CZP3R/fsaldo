@@ -1,6 +1,7 @@
 export type Saldo = {
     id: string;
     name: string;
+    createdAt: Date;
     saldoEntry: SaldoEntry[] | undefined;
 
 }
