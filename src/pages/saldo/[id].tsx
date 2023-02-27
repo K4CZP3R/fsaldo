@@ -72,6 +72,20 @@ export default function SaldoId() {
             ))}
           </TableBody>
         </Table>
+
+        <Button
+          onClick={() => {
+            let newEntry: SaldoEntry = {
+              id: "",
+              amount: 0,
+              createdAt: new Date().toISOString(),
+              name: "",
+            };
+
+            setEntries([...entries, newEntry]);
+          }}
+          text="Add new entry"
+        ></Button>
       </Card>
     </Shell>
   );
