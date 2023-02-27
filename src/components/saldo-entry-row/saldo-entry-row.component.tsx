@@ -1,12 +1,5 @@
 import { SaldoEntry } from "@/models/saldo.model";
-import {
-  TableCell,
-  TableRow,
-  Text,
-  Badge,
-  TextInput,
-  Button,
-} from "@tremor/react";
+import { TableCell, TableRow, Text, TextInput, Button } from "@tremor/react";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -24,6 +17,7 @@ export type SaldoEntryRowProps = {
 export default function SaldoEntryRow(props: SaldoEntryRowProps) {
   const [name, setName] = useState(props.item.name);
   const [amount, setAmount] = useState(props.item.amount);
+  const [date, setDate] = useState(new Date(props.item.createdAt));
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -39,7 +33,11 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
   const callb = useCallback(() => {
     setLoading(true);
     if (props.item.id !== "") {
-      updateSaldoEntry(props.saldoId, props.item.id, { name, amount })
+      updateSaldoEntry(props.saldoId, props.item.id, {
+        name,
+        amount,
+        createdAt: date,
+      })
         .then((res) => {
           props.onChange?.();
           setLoading(false);
@@ -48,7 +46,7 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
           console.log(err);
         });
     } else {
-      addEntryToSaldo(props.saldoId, { name, amount })
+      addEntryToSaldo(props.saldoId, { name, amount, createdAt: date })
         .then((res) => {
           props.onChange?.();
           setLoading(false);
@@ -57,7 +55,7 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
           console.log(err);
         });
     }
-  }, [name, amount, props]);
+  }, [name, amount, date, props]);
 
   if (loading) {
     return (
@@ -87,7 +85,13 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
           />
         </TableCell>
         <TableCell>
-          <Text>{props.item.createdAt.toString()}</Text>
+          <input
+            defaultValue={date.toISOString().split("T")[0]}
+            onChange={(e) => {
+              setDate(e.target.valueAsDate!);
+            }}
+            type="date"
+          ></input>
         </TableCell>
         {props.children}
         <TableCell>
