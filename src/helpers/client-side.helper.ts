@@ -21,7 +21,7 @@ export async function deleteSaldo(id: string): Promise<Saldo | undefined> {
     return response.data;
 }
 
-export async function addEntryToSaldo(saldoId: string, entry: SaldoEntry): Promise<Saldo | undefined> {
+export async function addEntryToSaldo(saldoId: string, entry: SaldoEntryUpdate): Promise<Saldo | undefined> {
     const response = await dataRequest<Saldo>(`/api/saldo/${saldoId}/entry`, { saldoEntry: entry });
     return response.data;
 }
