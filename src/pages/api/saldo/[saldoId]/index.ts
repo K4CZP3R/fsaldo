@@ -36,6 +36,14 @@ export default async function handler(
                     data: saldo
                 })
                 break;
+            case "DELETE":
+                res.status(200).json({
+                    data: await prisma.saldo.delete({
+                        where: {
+                            id: saldoId as string
+                        }
+                    })
+                })
             default:
                 res.status(405).json({
                     message: "Method not allowed"
