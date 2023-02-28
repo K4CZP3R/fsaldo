@@ -5,6 +5,7 @@ import "@tremor/react/dist/esm/tremor.css";
 import { Subtitle } from "@tremor/react";
 import Header from "@/components/header/header.component";
 import Modal from "react-modal";
+import "react-loading-skeleton/dist/skeleton.css";
 
 Modal.setAppElement("#__next");
 
