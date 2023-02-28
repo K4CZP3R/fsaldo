@@ -1,9 +1,10 @@
 import { Title, Text } from "@tremor/react";
+import Skeleton from "react-loading-skeleton";
 
 export interface ShellProps {
   children: React.ReactNode;
   title: string;
-  text: string;
+  text?: string;
 }
 
 export default function Shell(props: ShellProps) {
@@ -18,7 +19,7 @@ export default function Shell(props: ShellProps) {
       }}
     >
       <Title>{props.title}</Title>
-      <Text>{props.text}</Text>
+      <Text>{props.text || <Skeleton style={{ width: "25%" }} />}</Text>
 
       {props.children}
     </main>

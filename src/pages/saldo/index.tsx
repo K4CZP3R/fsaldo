@@ -14,6 +14,7 @@ import {
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import Modal from "react-modal";
+import Skeleton from "react-loading-skeleton";
 
 const customStyles = {
   content: {
@@ -71,6 +72,18 @@ export default function SaldoIndex() {
         gapY="gap-y-6"
         marginTop="mt-6"
       >
+        {!saldos && (
+          <>
+            <Card>
+              <Text>
+                <Skeleton />
+              </Text>
+              <Metric>
+                <Skeleton />
+              </Metric>
+            </Card>
+          </>
+        )}
         {saldos?.map((saldo) => (
           <Card key={saldo.id}>
             <Text>{saldo.name}</Text>

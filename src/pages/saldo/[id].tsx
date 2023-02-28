@@ -21,6 +21,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import SaldoEntryRow from "@/components/saldo-entry-row/saldo-entry-row.component";
+import Skeleton from "react-loading-skeleton";
 
 export default function SaldoId() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function SaldoId() {
 
   const [saldo, setSaldo] = useState<Saldo>();
 
-  const [entries, setEntries] = useState<SaldoEntry[]>([]);
+  const [entries, setEntries] = useState<SaldoEntry[]>();
 
   const fetchSaldo = useCallback(() => {
     if (!id) return;
@@ -51,7 +52,7 @@ export default function SaldoId() {
   }, [fetchSaldo]);
 
   return (
-    <Shell title="Saldo" text={saldo?.name ?? ""}>
+    <Shell title="Saldo" text={saldo?.name}>
       <Card maxWidth="max-w-full" marginTop="mt-6">
         <Title>Transactions</Title>
 
@@ -67,38 +68,64 @@ export default function SaldoId() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {entries.map((item) => (
-              <SaldoEntryRow
-                onChange={() => fetchSaldo()}
-                saldoId={saldo!.id}
-                key={item.id}
-                item={item}
-              >
-                <TableCell>
-                  <Badge
-                    text={item.amount.toString()}
-                    color="emerald"
-                    icon={ArrowRightIcon}
-                  />
-                </TableCell>
-              </SaldoEntryRow>
-            ))}
+            {entries ? (
+              <>
+                {entries.map((item) => (
+                  <SaldoEntryRow
+                    onChange={() => fetchSaldo()}
+                    saldoId={saldo!.id}
+                    key={item.id}
+                    item={item}
+                  >
+                    <TableCell>
+                      <Badge
+                        text={item.amount.toString()}
+                        color="emerald"
+                        icon={ArrowRightIcon}
+                      />
+                    </TableCell>
+                  </SaldoEntryRow>
+                ))}
+              </>
+            ) : (
+              <>
+                <TableRow>
+                  <TableCell>
+                    <Skeleton />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton />
+                  </TableCell>
+                </TableRow>
+              </>
+            )}
           </TableBody>
         </Table>
 
-        <Button
-          onClick={() => {
-            let newEntry: SaldoEntry = {
-              id: "",
-              amount: 0,
-              createdAt: new Date().toISOString(),
-              name: "",
-            };
+        {entries && (
+          <Button
+            onClick={() => {
+              let newEntry: SaldoEntry = {
+                id: "",
+                amount: 0,
+                createdAt: new Date().toISOString(),
+                name: "",
+              };
 
-            setEntries([...entries, newEntry]);
-          }}
-          text="Add new entry"
-        ></Button>
+              setEntries([...(entries ?? []), newEntry]);
+            }}
+            text="Add new entry"
+          ></Button>
+        )}
       </Card>
     </Shell>
   );

@@ -6,6 +6,7 @@ import {
   addEntryToSaldo,
   updateSaldoEntry,
 } from "@/helpers/client-side.helper";
+import Skeleton from "react-loading-skeleton";
 
 export type SaldoEntryRowProps = {
   saldoId: string;
@@ -61,7 +62,19 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
     return (
       <TableRow>
         <TableCell>
-          <Text>Loading...</Text>
+          <Skeleton />
+        </TableCell>
+        <TableCell>
+          <Skeleton />
+        </TableCell>
+        <TableCell>
+          <Skeleton />
+        </TableCell>
+        <TableCell>
+          <Skeleton />
+        </TableCell>
+        <TableCell>
+          <Skeleton />
         </TableCell>
       </TableRow>
     );
