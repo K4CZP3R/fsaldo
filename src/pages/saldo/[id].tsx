@@ -22,6 +22,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import SaldoEntryRow from "@/components/saldo-entry-row/saldo-entry-row.component";
 import Skeleton from "react-loading-skeleton";
+import { getSaldoTo } from "@/helpers/saldo.helper";
 
 export default function SaldoId() {
   const router = useRouter();
@@ -50,32 +51,6 @@ export default function SaldoId() {
       setFetching(false);
     });
   }, [id]);
-
-  function getSaldoTo(item: SaldoEntry, entries: SaldoEntry[]) {
-    // Calculate saldo to this item
-    let saldo = 0;
-
-    // Deep copy
-    let entriesCopy = JSON.parse(JSON.stringify(entries)) as SaldoEntry[];
-
-    // Sort by date
-    entriesCopy.sort((a, b) => {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    });
-
-    // Get index of item
-    let index = entriesCopy.findIndex((e) => e.id === item.id);
-
-    // Get all entries before this item
-    let entriesBefore = entriesCopy.slice(0, index + 1);
-
-    // Calculate saldo
-    entriesBefore.forEach((e) => {
-      saldo += e.amount;
-    });
-
-    return saldo;
-  }
 
   useEffect(() => {
     fetchSaldo();
