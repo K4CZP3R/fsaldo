@@ -4,6 +4,7 @@ import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { useCallback, useEffect, useState } from "react";
 import {
   addEntryToSaldo,
+  deleteSaldoEntry,
   updateSaldoEntry,
 } from "@/helpers/client-side.helper";
 import Skeleton from "react-loading-skeleton";
@@ -30,6 +31,16 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
       setEditMode(true);
     }
   }, [props.item]);
+
+  const rmCallb = useCallback(async () => {
+    setLoading(true);
+
+    await deleteSaldoEntry(props.saldoId, props.item.id);
+
+    props.onChange?.();
+
+    setLoading(false);
+  }, [props]);
 
   const callb = useCallback(() => {
     setLoading(true);
@@ -137,6 +148,15 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
             variant="light"
             size="sm"
             text="Edit"
+          />
+          <Button
+            onClick={() => {
+              rmCallb();
+            }}
+            variant="light"
+            size="sm"
+            text="Delete"
+            color="red"
           />
         </TableCell>
       </TableRow>
