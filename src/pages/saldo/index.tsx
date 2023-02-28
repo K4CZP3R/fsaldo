@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import Modal from "react-modal";
 import Skeleton from "react-loading-skeleton";
+import { getEndingSaldo } from "@/helpers/saldo.helper";
 
 const customStyles = {
   content: {
@@ -87,7 +88,7 @@ export default function SaldoIndex() {
         {saldos?.map((saldo) => (
           <Card key={saldo.id}>
             <Text>{saldo.name}</Text>
-            <Metric>0,00</Metric>
+            <Metric>&euro;{getEndingSaldo(saldo.saldoEntry)}</Metric>
             <Footer>
               <Flex>
                 <Button
