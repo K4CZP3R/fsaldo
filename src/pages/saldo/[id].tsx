@@ -28,11 +28,13 @@ export default function SaldoId() {
   const { id } = router.query;
 
   const [saldo, setSaldo] = useState<Saldo>();
-
   const [entries, setEntries] = useState<SaldoEntry[]>();
+  const [fetching, setFetching] = useState<boolean>(false);
 
   const fetchSaldo = useCallback(() => {
     if (!id) return;
+
+    setFetching(true);
     getSaldo(id.toString()).then((saldo) => {
       setSaldo(saldo);
 
@@ -44,8 +46,36 @@ export default function SaldoId() {
         });
         setEntries(saldo.saldoEntry);
       }
+
+      setFetching(false);
     });
   }, [id]);
+
+  function getSaldoTo(item: SaldoEntry, entries: SaldoEntry[]) {
+    // Calculate saldo to this item
+    let saldo = 0;
+
+    // Deep copy
+    let entriesCopy = JSON.parse(JSON.stringify(entries)) as SaldoEntry[];
+
+    // Sort by date
+    entriesCopy.sort((a, b) => {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    });
+
+    // Get index of item
+    let index = entriesCopy.findIndex((e) => e.id === item.id);
+
+    // Get all entries before this item
+    let entriesBefore = entriesCopy.slice(0, index + 1);
+
+    // Calculate saldo
+    entriesBefore.forEach((e) => {
+      saldo += e.amount;
+    });
+
+    return saldo;
+  }
 
   useEffect(() => {
     fetchSaldo();
@@ -78,11 +108,17 @@ export default function SaldoId() {
                     item={item}
                   >
                     <TableCell>
-                      <Badge
-                        text={item.amount.toString()}
-                        color="emerald"
-                        icon={ArrowRightIcon}
-                      />
+                      {fetching ? (
+                        <Skeleton />
+                      ) : (
+                        <Badge
+                          text={getSaldoTo(item, entries).toString()}
+                          color={
+                            getSaldoTo(item, entries) < 0 ? "red" : "green"
+                          }
+                          icon={ArrowRightIcon}
+                        />
+                      )}
                     </TableCell>
                   </SaldoEntryRow>
                 ))}
