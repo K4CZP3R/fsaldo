@@ -23,6 +23,9 @@ export default async function handler(
                     data: await prisma.saldo.findMany({
                         where: {
                             userId: user.id
+                        },
+                        include: {
+                            saldoEntry: true
                         }
                     })
                 })
