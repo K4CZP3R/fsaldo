@@ -1,9 +1,11 @@
 import CreateSaldo from "@/components/create-saldo/create-saldo.component";
 import Shell from "@/components/shell/shell.component";
-import { deleteSaldo, getSaldos } from "@/helpers/client-side.helper";
-import { Saldo } from "@/models/saldo.model";
+// import { deleteSaldo, getSaldos } from "@/helpers/client-side.helper";
+// import { Saldo } from "@/models/saldo.model";
+import useSWR from "swr";
 import {
   Button,
+  Callout,
   Card,
   ColGrid,
   Flex,
@@ -12,10 +14,11 @@ import {
   Text,
 } from "@tremor/react";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Modal from "react-modal";
 import Skeleton from "react-loading-skeleton";
 import { getEndingSaldo } from "@/helpers/saldo.helper";
+import { deleteSaldo, useGetSaldos } from "@/helpers/client-side.helper";
 
 const customStyles = {
   content: {
@@ -27,32 +30,24 @@ const customStyles = {
 };
 
 export default function SaldoIndex() {
-  const [saldos, setSaldos] = useState<Saldo[]>();
+  // const [saldos, setSaldos] = useState<Saldo[]>();
   const router = useRouter();
 
-  useEffect(() => {
-    fetchSaldos();
-  }, []);
-
-  const fetchSaldos = useCallback(async () => {
-    getSaldos()
-      .then((saldos) => setSaldos(saldos ?? []))
-      .catch(() => console.log("errortjes"));
-  }, []);
-
+  const { data, error, isLoading, mutate } = useGetSaldos();
   const [modalIsOpen, setIsOpen] = useState(false);
 
   function closeModal() {
     setIsOpen(false);
-    fetchSaldos();
+    mutate();
   }
 
   function onDeleteSaldo(id: string) {
-    deleteSaldo(id).then(() => fetchSaldos());
+    deleteSaldo(id).then(() => mutate(data?.filter((s) => s.id !== id)));
   }
 
   return (
-    <Shell title="Saldos" text="Create, view, delete your saldos.">
+    <Shell title="Saldos" text="Create, view, delete your saldos. ">
+      {error && <Callout title="error" text={error.message} color="red" />}
       <Button text="Create saldo" onClick={() => setIsOpen(true)} />
       <Modal
         style={customStyles}
@@ -65,15 +60,15 @@ export default function SaldoIndex() {
           }}
         ></CreateSaldo>
       </Modal>
-
       <ColGrid
-        numCols={2}
+        numColsSm={1}
+        numColsMd={2}
         numColsLg={3}
         gapX="gap-x-6"
         gapY="gap-y-6"
         marginTop="mt-6"
       >
-        {!saldos && (
+        {isLoading && !error && (
           <>
             <Card>
               <Text>
@@ -85,7 +80,7 @@ export default function SaldoIndex() {
             </Card>
           </>
         )}
-        {saldos?.map((saldo) => (
+        {data?.map((saldo) => (
           <Card key={saldo.id}>
             <Text>{saldo.name}</Text>
             <Metric>&euro;{getEndingSaldo(saldo.saldoEntry)}</Metric>

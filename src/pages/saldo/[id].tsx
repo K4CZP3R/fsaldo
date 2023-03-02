@@ -1,11 +1,7 @@
 import Shell from "@/components/shell/shell.component";
-import { getSaldo } from "@/helpers/client-side.helper";
-import { Saldo, SaldoEntry } from "@/models/saldo.model";
+import { SaldoEntry } from "@/models/saldo.model";
 import {
   Card,
-  Text,
-  List,
-  ListItem,
   Table,
   TableBody,
   TableCell,
@@ -14,52 +10,40 @@ import {
   TableRow,
   Title,
   Badge,
-  TextInput,
   Button,
+  Callout,
 } from "@tremor/react";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import SaldoEntryRow from "@/components/saldo-entry-row/saldo-entry-row.component";
 import Skeleton from "react-loading-skeleton";
 import { getSaldoTo } from "@/helpers/saldo.helper";
+import { useGetSaldo } from "@/helpers/client-side.helper";
 
 export default function SaldoId() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [saldo, setSaldo] = useState<Saldo>();
   const [entries, setEntries] = useState<SaldoEntry[]>();
-  const [fetching, setFetching] = useState<boolean>(false);
 
-  const fetchSaldo = useCallback(() => {
-    if (!id) return;
-
-    setFetching(true);
-    getSaldo(id.toString()).then((saldo) => {
-      setSaldo(saldo);
-
-      if (saldo?.saldoEntry) {
-        saldo.saldoEntry.sort((a, b) => {
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        });
-        setEntries(saldo.saldoEntry);
-      }
-
-      setFetching(false);
-    });
-  }, [id]);
+  const { data, error, isLoading, mutate } = useGetSaldo(
+    id ? id.toString() : null
+  );
 
   useEffect(() => {
-    fetchSaldo();
-  }, [fetchSaldo]);
+    data?.saldoEntry.sort((a, b) => {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    });
+    setEntries(data?.saldoEntry);
+  }, [data]);
 
   return (
-    <Shell title="Saldo" text={saldo?.name}>
+    <Shell title="Saldo" text={data?.name}>
       <Card maxWidth="max-w-full" marginTop="mt-6">
         <Title>Transactions</Title>
+
+        {error && <Callout title="Error" text={error.message} color="red" />}
 
         <Table marginTop="mt-5">
           <TableHead>
@@ -77,13 +61,13 @@ export default function SaldoId() {
               <>
                 {entries.map((item) => (
                   <SaldoEntryRow
-                    onChange={() => fetchSaldo()}
-                    saldoId={saldo!.id}
+                    onChange={() => mutate()}
+                    saldoId={data!.id}
                     key={item.id}
                     item={item}
                   >
                     <TableCell>
-                      {fetching ? (
+                      {isLoading ? (
                         <Skeleton />
                       ) : (
                         <Badge
