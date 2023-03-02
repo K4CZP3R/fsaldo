@@ -34,12 +34,8 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
 
   const rmCallb = useCallback(async () => {
     setLoading(true);
-
     await deleteSaldoEntry(props.saldoId, props.item.id);
-
     props.onChange?.();
-
-    setLoading(false);
   }, [props]);
 
   const callb = useCallback(() => {
