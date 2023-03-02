@@ -12,6 +12,11 @@ import {
   Badge,
   Button,
   Callout,
+  AccordionList,
+  Accordion,
+  AccordionHeader,
+  AccordionBody,
+  Flex,
 } from "@tremor/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -20,6 +25,7 @@ import SaldoEntryRow from "@/components/saldo-entry-row/saldo-entry-row.componen
 import Skeleton from "react-loading-skeleton";
 import { getSaldoTo } from "@/helpers/saldo.helper";
 import { useGetSaldo } from "@/helpers/client-side.helper";
+import { useMediaQuery } from "@/helpers/media-query.helper";
 
 export default function SaldoId() {
   const router = useRouter();
@@ -37,6 +43,38 @@ export default function SaldoId() {
     });
     setEntries(data?.saldoEntry);
   }, [data]);
+
+  const isSmol = useMediaQuery(600);
+
+  if (isSmol) {
+    return (
+      <Shell title="Saldo" text={data?.name}>
+        <AccordionList //The AccordionList is optional
+          shadow={true}
+          marginTop="mt-0"
+        >
+          {(entries ?? []).map((item) => (
+            <Accordion key={item.id} expanded={false} shadow={true}>
+              <AccordionHeader>
+                <Flex>
+                  <span>{item.name}</span>
+                  <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                  <Badge
+                    text={getSaldoTo(item, entries ?? []).toString()}
+                    color={
+                      getSaldoTo(item, entries ?? []) < 0 ? "red" : "green"
+                    }
+                    icon={ArrowRightIcon}
+                  />
+                </Flex>
+              </AccordionHeader>
+              <AccordionBody>{item.amount}</AccordionBody>
+            </Accordion>
+          ))}
+        </AccordionList>
+      </Shell>
+    );
+  }
 
   return (
     <Shell title="Saldo" text={data?.name}>
