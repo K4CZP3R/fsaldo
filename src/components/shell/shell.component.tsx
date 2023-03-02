@@ -15,7 +15,7 @@ export default function Shell(props: ShellProps) {
         borderWidth: "1px",
         borderRadius: "0.5rem",
         backgroundColor: "rgb(249 250 251)",
-        padding: "2.5rem",
+        padding: "1.5rem",
       }}
     >
       <Title>{props.title}</Title>
