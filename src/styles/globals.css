@@ -23,6 +23,12 @@ body,
     flex: 1;
 }
 
+@media (max-width: 600px) {
+    .box-2 {
+        padding: 0.25rem !important;
+    }
+}
+
 .box-3 {
     height: 60px;
 }

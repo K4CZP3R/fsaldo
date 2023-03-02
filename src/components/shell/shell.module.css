@@ -1,0 +1,15 @@
+.main {
+    border: 1px solid rgb(229, 231, 235);
+    border-width: 1px;
+    border-radius: 0.5rem;
+    background-color: rgb(249, 250, 251);
+    padding: 1.5rem;
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+
+@media (max-width: 600px) {
+    .main {
+        padding: 0.5rem;
+    }
+}
