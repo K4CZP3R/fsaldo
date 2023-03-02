@@ -135,7 +135,7 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
           <Text>{amount}</Text>
         </TableCell>
         <TableCell>
-          <Text>{props.item.createdAt.toString()}</Text>
+          <Text>{new Date(props.item.createdAt).toLocaleDateString()}</Text>
         </TableCell>
         {props.children}
         <TableCell>
