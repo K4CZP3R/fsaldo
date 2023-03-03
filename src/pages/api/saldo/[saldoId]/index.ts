@@ -26,19 +26,26 @@ export default async function handler(
 
     switch (req.method) {
       case "GET":
-        res.status(200).json({
+        return res.status(200).json({
           data: saldo,
         });
-        break;
+      case "PUT":
+        return res.status(200).json({
+          data: await prisma.saldo.update({
+            where: {
+              id: saldoId as string,
+            },
+            data: req.body.saldo,
+          }),
+        });
       case "DELETE":
-        res.status(200).json({
+        return res.status(200).json({
           data: await prisma.saldo.delete({
             where: {
               id: saldoId as string,
             },
           }),
         });
-        break;
       default:
         res.status(405).json({
           message: "Method not allowed",

@@ -16,7 +16,7 @@ export default async function handler(
 
     switch (req.method) {
       case "GET":
-        res.status(200).json({
+        return res.status(200).json({
           data: await prisma.saldo.findMany({
             where: {
               userId: user.id,
@@ -26,9 +26,9 @@ export default async function handler(
             },
           }),
         });
-        break;
+
       case "POST":
-        res.status(200).json({
+        return res.status(200).json({
           data: await prisma.saldo.create({
             data: {
               userId: user.id,
@@ -37,7 +37,6 @@ export default async function handler(
             },
           }),
         });
-        break;
       default:
         res.status(405).json({
           message: "Method not allowed",
