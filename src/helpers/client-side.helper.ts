@@ -27,8 +27,11 @@ export async function deleteSaldo(id: string): Promise<Saldo | undefined> {
 //   return response.data;
 // }
 
-export async function createSaldo(name: string): Promise<Saldo | undefined> {
-  const response = await dataRequest<Saldo>(`/api/saldo`, { name });
+export async function createSaldo(
+  name: string,
+  debitLimit: number
+): Promise<Saldo | undefined> {
+  const response = await dataRequest<Saldo>(`/api/saldo`, { name, debitLimit });
   return response.data;
 }
 
