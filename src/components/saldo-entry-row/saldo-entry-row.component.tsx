@@ -1,6 +1,5 @@
 import { SaldoEntry } from "@/models/saldo.model";
 import { TableCell, TableRow, Text, TextInput, Button } from "@tremor/react";
-import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { useCallback, useEffect, useState } from "react";
 import {
   addEntryToSaldo,
@@ -8,6 +7,8 @@ import {
   updateSaldoEntry,
 } from "@/helpers/client-side.helper";
 import Skeleton from "react-loading-skeleton";
+import { strDate, valuta } from "@/helpers/string.helper";
+import NumberInput from "../number-input/number-input.compontent";
 
 export type SaldoEntryRowProps = {
   saldoId: string;
@@ -54,7 +55,11 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
           console.log(err);
         });
     } else {
-      addEntryToSaldo(props.saldoId, { name, amount, createdAt: date })
+      addEntryToSaldo(props.saldoId, {
+        name,
+        amount,
+        createdAt: date,
+      })
         .then((res) => {
           props.onChange?.();
           setLoading(false);
@@ -99,10 +104,7 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
           />
         </TableCell>
         <TableCell>
-          <TextInput
-            value={amount.toString()}
-            onChange={(e) => setAmount(parseFloat(e.target.value))}
-          />
+          <NumberInput value={amount} onChange={setAmount} />
         </TableCell>
         <TableCell>
           <input
@@ -132,10 +134,10 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
       <TableRow>
         <TableCell>{name}</TableCell>
         <TableCell>
-          <Text>{amount}</Text>
+          <Text>{valuta(amount)}</Text>
         </TableCell>
         <TableCell>
-          <Text>{new Date(props.item.createdAt).toLocaleDateString()}</Text>
+          <Text>{strDate(props.item.createdAt)}</Text>
         </TableCell>
         {props.children}
         <TableCell>
