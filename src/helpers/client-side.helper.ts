@@ -27,6 +27,24 @@ export async function deleteSaldo(id: string): Promise<Saldo | undefined> {
 //   return response.data;
 // }
 
+export async function updateSaldo(
+  id: string,
+  name: string,
+  debitLimit: number
+): Promise<Saldo | undefined> {
+  const response = await dataRequest<Saldo>(
+    `/api/saldo/${id}`,
+    {
+      saldo: {
+        name,
+        debitLimit,
+      },
+    },
+    "PUT"
+  );
+  return response.data;
+}
+
 export async function createSaldo(
   name: string,
   debitLimit: number
