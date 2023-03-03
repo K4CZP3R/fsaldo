@@ -19,6 +19,8 @@ import Modal from "react-modal";
 import Skeleton from "react-loading-skeleton";
 import { getEndingSaldo } from "@/helpers/saldo.helper";
 import { deleteSaldo, useGetSaldos } from "@/helpers/client-side.helper";
+import { valuta } from "@/helpers/string.helper";
+import { Saldo } from "@/models/saldo.model";
 
 const customStyles = {
   content: {
@@ -30,7 +32,7 @@ const customStyles = {
 };
 
 export default function SaldoIndex() {
-  // const [saldos, setSaldos] = useState<Saldo[]>();
+  const [selectedSaldo, setSelectedSaldo] = useState<Saldo>();
   const router = useRouter();
 
   const { data, error, isLoading, mutate } = useGetSaldos();
@@ -48,13 +50,20 @@ export default function SaldoIndex() {
   return (
     <Shell title="Saldos" text="Create, view, delete your saldos. ">
       {error && <Callout title="error" text={error.message} color="red" />}
-      <Button text="Create saldo" onClick={() => setIsOpen(true)} />
+      <Button
+        text="Create saldo"
+        onClick={() => {
+          setSelectedSaldo(undefined);
+          setIsOpen(true);
+        }}
+      />
       <Modal
         style={customStyles}
         onRequestClose={closeModal}
         isOpen={modalIsOpen}
       >
         <CreateSaldo
+          saldo={selectedSaldo}
           onSubmit={() => {
             closeModal();
           }}
@@ -83,7 +92,12 @@ export default function SaldoIndex() {
         {data?.map((saldo) => (
           <Card key={saldo.id}>
             <Text>{saldo.name}</Text>
-            <Metric>&euro;{getEndingSaldo(saldo.saldoEntry)}</Metric>
+            <Metric>{valuta(getEndingSaldo(saldo.saldoEntry))}</Metric>
+            <Text>
+              {saldo.debitLimit
+                ? `Debit limit of ${valuta(saldo.debitLimit)}`
+                : "No debit limit"}
+            </Text>
             <Footer>
               <Flex>
                 <Button
@@ -92,7 +106,15 @@ export default function SaldoIndex() {
                   size="sm"
                   text="View"
                 />
-
+                <Button
+                  onClick={() => {
+                    setSelectedSaldo(saldo);
+                    setIsOpen(true);
+                  }}
+                  variant="light"
+                  size="sm"
+                  text="Edit"
+                />
                 <Button
                   onClick={() => onDeleteSaldo(saldo.id)}
                   variant="light"
