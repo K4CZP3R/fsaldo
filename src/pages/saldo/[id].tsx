@@ -1,6 +1,7 @@
 import Shell from "@/components/shell/shell.component";
 import { SaldoEntry } from "@/models/saldo.model";
 import {
+  Text,
   Card,
   Table,
   TableBody,
@@ -9,7 +10,6 @@ import {
   TableHeaderCell,
   TableRow,
   Title,
-  Badge,
   Button,
   Callout,
   AccordionList,
@@ -17,15 +17,25 @@ import {
   AccordionHeader,
   AccordionBody,
   Flex,
+  LineChart,
+  Tracking,
+  TrackingBlock,
 } from "@tremor/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import SaldoEntryRow from "@/components/saldo-entry-row/saldo-entry-row.component";
 import Skeleton from "react-loading-skeleton";
-import { getSaldoTo } from "@/helpers/saldo.helper";
+import {
+  getSaldoTo,
+  saldoFlowChart,
+  saldoWithFlow,
+} from "@/helpers/saldo.helper";
 import { useGetSaldo } from "@/helpers/client-side.helper";
 import { useMediaQuery } from "@/helpers/media-query.helper";
+import SaldoBadge, {
+  getSaldoColor,
+} from "@/components/badge/saldo-badge.component";
+import { strDate, valuta } from "@/helpers/string.helper";
 
 export default function SaldoId() {
   const router = useRouter();
@@ -58,17 +68,15 @@ export default function SaldoId() {
               <AccordionHeader>
                 <Flex>
                   <span>{item.name}</span>
-                  <span>{new Date(item.createdAt).toLocaleDateString()}</span>
-                  <Badge
-                    text={getSaldoTo(item, entries ?? []).toString()}
-                    color={
-                      getSaldoTo(item, entries ?? []) < 0 ? "red" : "green"
-                    }
-                    icon={ArrowRightIcon}
-                  />
+                  <span>{strDate(item.createdAt)}</span>
+                  <SaldoBadge value={getSaldoTo(item, entries ?? [])} />
                 </Flex>
               </AccordionHeader>
-              <AccordionBody>{item.amount}</AccordionBody>
+              <AccordionBody>
+                <Flex>
+                  <span>{valuta(item.amount)}</span>
+                </Flex>
+              </AccordionBody>
             </Accordion>
           ))}
         </AccordionList>
@@ -108,13 +116,7 @@ export default function SaldoId() {
                       {isLoading ? (
                         <Skeleton />
                       ) : (
-                        <Badge
-                          text={getSaldoTo(item, entries).toString()}
-                          color={
-                            getSaldoTo(item, entries) < 0 ? "red" : "green"
-                          }
-                          icon={ArrowRightIcon}
-                        />
+                        <SaldoBadge value={getSaldoTo(item, entries)} />
                       )}
                     </TableCell>
                   </SaldoEntryRow>
@@ -160,6 +162,52 @@ export default function SaldoId() {
           ></Button>
         )}
       </Card>
+
+      <Card maxWidth="max-w-full" marginTop="mt-6">
+        <Title>Flow</Title>
+
+        {entries && (
+          <LineChart
+            data={saldoFlowChart(entries)}
+            categories={["Saldo", "Daily change"]}
+            colors={["blue", "gray"]}
+            dataKey="Date"
+            valueFormatter={(value) => valuta(value)}
+          />
+        )}
+      </Card>
+
+      <Flex marginTop="mt-6">
+        <Card maxWidth="max-w-md">
+          <Title>Status</Title>
+          <Text>Saldo</Text>
+          <Tracking marginTop="mt-2">
+            {entries &&
+              saldoFlowChart(entries).map((item) => (
+                <TrackingBlock
+                  key={item.Date}
+                  color={getSaldoColor(item.Saldo)}
+                  tooltip={valuta(item.Saldo)}
+                />
+              ))}
+          </Tracking>
+        </Card>
+
+        <Card maxWidth="max-w-md">
+          <Title>Status</Title>
+          <Text>Saldo</Text>
+          <Tracking marginTop="mt-2">
+            {entries &&
+              saldoFlowChart(entries).map((item) => (
+                <TrackingBlock
+                  key={item.Date}
+                  color={getSaldoColor(item["Daily change"])}
+                  tooltip={valuta(item["Daily change"])}
+                />
+              ))}
+          </Tracking>
+        </Card>
+      </Flex>
     </Shell>
   );
 }
