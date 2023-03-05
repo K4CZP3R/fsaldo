@@ -9,6 +9,7 @@ import {
 import Skeleton from "react-loading-skeleton";
 import { strDate, valuta } from "@/helpers/string.helper";
 import NumberInput from "../number-input/number-input.compontent";
+import { FsaldoDate } from "@/helpers/fsaldo-date.helper";
 
 export type SaldoEntryRowProps = {
   saldoId: string;
@@ -20,7 +21,9 @@ export type SaldoEntryRowProps = {
 export default function SaldoEntryRow(props: SaldoEntryRowProps) {
   const [name, setName] = useState(props.item.name);
   const [amount, setAmount] = useState(props.item.amount);
-  const [date, setDate] = useState(new Date(props.item.createdAt));
+  const [date, setDate] = useState(
+    FsaldoDate.fromString(props.item.date).toDate()
+  );
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +48,7 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
       updateSaldoEntry(props.saldoId, props.item.id, {
         name,
         amount,
-        createdAt: date,
+        date: FsaldoDate.fromDate(date).toString(),
       })
         .then((res) => {
           props.onChange?.();
@@ -58,7 +61,7 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
       addEntryToSaldo(props.saldoId, {
         name,
         amount,
-        createdAt: date,
+        date: FsaldoDate.fromDate(date).toString(),
       })
         .then((res) => {
           props.onChange?.();
@@ -137,7 +140,7 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
           <Text>{valuta(amount)}</Text>
         </TableCell>
         <TableCell>
-          <Text>{strDate(props.item.createdAt)}</Text>
+          <Text>{strDate(props.item.date)}</Text>
         </TableCell>
         {props.children}
         <TableCell>

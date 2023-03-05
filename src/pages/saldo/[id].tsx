@@ -26,22 +26,26 @@ import { useEffect, useState } from "react";
 import SaldoEntryRow from "@/components/saldo-entry-row/saldo-entry-row.component";
 import Skeleton from "react-loading-skeleton";
 import {
+  addEmptySaldoDays,
   getSaldoTo,
-  saldoFlowChart,
-  saldoWithFlow,
+  SaldoDayPresentable,
+  toSaldoDayPresentable,
+  toSaldoDays,
 } from "@/helpers/saldo.helper";
 import { useGetSaldo } from "@/helpers/client-side.helper";
 import { useMediaQuery } from "@/helpers/media-query.helper";
 import SaldoBadge, {
   getSaldoColor,
 } from "@/components/badge/saldo-badge.component";
-import { strDate, valuta } from "@/helpers/string.helper";
+import { date, strDate, valuta } from "@/helpers/string.helper";
+import { FsaldoDate } from "@/helpers/fsaldo-date.helper";
 
 export default function SaldoId() {
   const router = useRouter();
   const { id } = router.query;
 
   const [entries, setEntries] = useState<SaldoEntry[]>();
+  const [presentable, setPresentable] = useState<SaldoDayPresentable[]>();
 
   const { data, error, isLoading, mutate } = useGetSaldo(
     id ? id.toString() : null
@@ -49,10 +53,19 @@ export default function SaldoId() {
 
   useEffect(() => {
     data?.saldoEntry.sort((a, b) => {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return (
+        FsaldoDate.fromString(a.date).toInt() -
+        FsaldoDate.fromString(b.date).toInt()
+      );
     });
     setEntries(data?.saldoEntry);
   }, [data]);
+
+  useEffect(() => {
+    setPresentable(
+      toSaldoDayPresentable(addEmptySaldoDays(toSaldoDays(entries ?? [])))
+    );
+  }, [entries]);
 
   const isSmol = useMediaQuery(600);
 
@@ -68,8 +81,11 @@ export default function SaldoId() {
               <AccordionHeader>
                 <Flex>
                   <span>{item.name}</span>
-                  <span>{strDate(item.createdAt)}</span>
-                  <SaldoBadge value={getSaldoTo(item, entries ?? [])} />
+                  <span>{item.date}</span>
+                  <SaldoBadge
+                    debitLimit={data?.debitLimit}
+                    value={getSaldoTo(item, entries ?? [])}
+                  />
                 </Flex>
               </AccordionHeader>
               <AccordionBody>
@@ -116,7 +132,10 @@ export default function SaldoId() {
                       {isLoading ? (
                         <Skeleton />
                       ) : (
-                        <SaldoBadge value={getSaldoTo(item, entries)} />
+                        <SaldoBadge
+                          debitLimit={data?.debitLimit}
+                          value={getSaldoTo(item, entries)}
+                        />
                       )}
                     </TableCell>
                   </SaldoEntryRow>
@@ -152,7 +171,7 @@ export default function SaldoId() {
               let newEntry: SaldoEntry = {
                 id: "",
                 amount: 0,
-                createdAt: new Date().toISOString(),
+                date: FsaldoDate.now().toString(),
                 name: "",
               };
 
@@ -165,16 +184,13 @@ export default function SaldoId() {
 
       <Card maxWidth="max-w-full" marginTop="mt-6">
         <Title>Flow</Title>
-
-        {entries && (
-          <LineChart
-            data={saldoFlowChart(entries)}
-            categories={["Saldo", "Daily change"]}
-            colors={["blue", "gray"]}
-            dataKey="Date"
-            valueFormatter={(value) => valuta(value)}
-          />
-        )}
+        <LineChart
+          data={presentable ?? []}
+          categories={["Saldo", "Daily change"]}
+          colors={["blue", "gray"]}
+          dataKey="Date"
+          valueFormatter={(value) => valuta(value)}
+        />
       </Card>
 
       <Flex marginTop="mt-6">
@@ -182,29 +198,27 @@ export default function SaldoId() {
           <Title>Status</Title>
           <Text>Saldo</Text>
           <Tracking marginTop="mt-2">
-            {entries &&
-              saldoFlowChart(entries).map((item) => (
-                <TrackingBlock
-                  key={item.Date}
-                  color={getSaldoColor(item.Saldo)}
-                  tooltip={valuta(item.Saldo)}
-                />
-              ))}
+            {(presentable ?? []).map((item) => (
+              <TrackingBlock
+                key={item.Date}
+                color={getSaldoColor(item.Saldo, data?.debitLimit)}
+                tooltip={`${item.Date}: ${valuta(item.Saldo)}`}
+              />
+            ))}
           </Tracking>
         </Card>
 
         <Card maxWidth="max-w-md">
           <Title>Status</Title>
-          <Text>Saldo</Text>
+          <Text>Daily change</Text>
           <Tracking marginTop="mt-2">
-            {entries &&
-              saldoFlowChart(entries).map((item) => (
-                <TrackingBlock
-                  key={item.Date}
-                  color={getSaldoColor(item["Daily change"])}
-                  tooltip={valuta(item["Daily change"])}
-                />
-              ))}
+            {(presentable ?? []).map((item) => (
+              <TrackingBlock
+                key={item.Date}
+                color={getSaldoColor(item["Daily change"])}
+                tooltip={`${item.Date}: ${valuta(item["Daily change"])}`}
+              />
+            ))}
           </Tracking>
         </Card>
       </Flex>

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.0.16",
-    "@prisma/client": "^4.10.1",
+    "@prisma/client": "^4.11.0",
     "@tremor/react": "^1.8.0",
     "@types/node": "18.14.1",
     "@types/react": "18.0.28",
@@ -28,6 +28,6 @@
   },
   "devDependencies": {
     "@types/react-modal": "^3.13.1",
-    "prisma": "^4.10.1"
+    "prisma": "^4.11.0"
   }
 }
