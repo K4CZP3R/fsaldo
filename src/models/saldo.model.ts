@@ -1,11 +1,13 @@
-export type ISaldo = {
+import { DbSaldoEntry, SaldoEntry } from "./saldo-entry.model";
+
+export interface DbSaldo {
   id: string;
   name: string;
-  saldoEntry: SaldoEntry[];
+  saldoEntry: DbSaldoEntry[];
   debitLimit?: number;
 };
 
-export class Saldo implements ISaldo {
+export class Saldo {
   id: string;
   name: string;
   saldoEntry: SaldoEntry[];
@@ -23,32 +25,21 @@ export class Saldo implements ISaldo {
     this.debitLimit = debitLimit;
   }
 
-  static fromObject(obj: ISaldo): Saldo {
-    return new Saldo(obj.id, obj.name, obj.saldoEntry, obj.debitLimit);
+  get sortedSaldoEntry(): SaldoEntry[] {
+    return this.saldoEntry.sort(SaldoEntry.sortFunction);
   }
 
-  // Wat de neuk, ik zit gewoon met in VR te typen, dit is echt te gek
-  // En ik zie gewoon mijn echte toetsenbord en mijn echte handen
-  // Lol
+  static fromDb(obj: DbSaldo): Saldo {
+    return new Saldo(obj.id, obj.name, obj.saldoEntry.map(e => SaldoEntry.fromDb(e)), obj.debitLimit);
+  }
 
-  // Ik heb dit in VR geschreven, ik ben echt een nerd
-  // xD
-
-  // wat gaaaf
-  // Je ziet mijn rommel gewoon op mijn bureau
-
-  // en mijn handen :p
+  toDb(): DbSaldo {
+    return {
+      id: this.id,
+      name: this.name,
+      saldoEntry: this.saldoEntry.map(e => e.toDb()),
+      debitLimit: this.debitLimit
+    }
+  }
 }
 
-export type SaldoEntry = {
-  id: string;
-  name: string;
-  amount: number;
-  date: string;
-};
-
-export type SaldoEntryUpdate = {
-  name?: string;
-  amount?: number;
-  date?: string;
-};
