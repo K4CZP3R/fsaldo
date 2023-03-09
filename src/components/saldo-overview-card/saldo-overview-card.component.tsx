@@ -1,5 +1,5 @@
 import { deleteSaldo } from "@/helpers/client-side.helper";
-import { getEndingSaldo } from "@/helpers/saldo.helper";
+// import { getEndingSaldo } from "@/helpers/saldo.helper";
 import { StringHelper } from "@/helpers/string.helper";
 import { Saldo } from "@/models/saldo.model";
 import { Button, Card, Flex, Footer, Metric, Text } from "@tremor/react";
@@ -48,9 +48,7 @@ export default function SaldoOverviewCard(props: SaldoOverviewCardProps) {
   return (
     <Card key={props.saldo.id}>
       <Text>{props.saldo.name}</Text>
-      <Metric>
-        {StringHelper.valuta(getEndingSaldo(props.saldo.saldoEntry))}
-      </Metric>
+      <Metric>{StringHelper.valuta(props.saldo.endingSaldo)}</Metric>
       <Text>
         {props.saldo.debitLimit
           ? `Debit limit of ${StringHelper.valuta(props.saldo.debitLimit)}`

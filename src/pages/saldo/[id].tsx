@@ -24,13 +24,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import SaldoEntryRow from "@/components/saldo-entry-row/saldo-entry-row.component";
 import Skeleton from "react-loading-skeleton";
-import {
-  addEmptySaldoDays,
-  getSaldoTo,
-  SaldoDayPresentable,
-  toSaldoDayPresentable,
-  toSaldoDays,
-} from "@/helpers/saldo.helper";
 import { useGetSaldo } from "@/helpers/client-side.helper";
 import { useMediaQuery } from "@/helpers/media-query.helper";
 import SaldoBadge, {
@@ -39,34 +32,44 @@ import SaldoBadge, {
 import { SaldoEntry } from "@/models/saldo-entry.model";
 import { StringHelper } from "@/helpers/string.helper";
 import Seo from "@/components/seo/seo.component";
+import { SaldoDayRange } from "@/models/saldo-day.model";
 
 export default function SaldoId() {
   const router = useRouter();
   const { id } = router.query;
 
   const [entries, setEntries] = useState<SaldoEntry[]>();
-  const [presentable, setPresentable] = useState<SaldoDayPresentable[]>();
+  const [saldoDayRange, setSaldoDayRange] = useState<SaldoDayRange>();
 
   const { data, error, isLoading, mutate } = useGetSaldo(
     id ? id.toString() : null
   );
 
   useEffect(() => {
-    setEntries(data?.sortedSaldoEntry);
+    setEntries(data?.saldoEntries);
   }, [data]);
 
   useEffect(() => {
-    setPresentable(
-      toSaldoDayPresentable(addEmptySaldoDays(toSaldoDays(entries ?? [])))
-    );
-  }, [entries]);
+    const entries = data?.saldoEntries;
+    if (!entries) return;
+
+    const minDate = entries[0].date;
+    const maxDate = entries[entries.length - 1].date;
+
+    let dayRange = new SaldoDayRange(minDate, maxDate);
+    entries.forEach((entry) => {
+      dayRange.addEntry(entry);
+    });
+
+    setSaldoDayRange(dayRange);
+  }, [data]);
 
   const isSmol = useMediaQuery(600);
 
   if (isSmol) {
     return (
       <Shell title="Saldo" text={data?.name}>
-        <Seo title={`Saldo: ${data?.name}`} />
+        <Seo title={`Saldo: ${data?.name ?? "Loading..."}`} />
         <AccordionList //The AccordionList is optional
           shadow={true}
           marginTop="mt-0"
@@ -79,7 +82,7 @@ export default function SaldoId() {
                   <span>{item.stringDate}</span>
                   <SaldoBadge
                     debitLimit={data?.debitLimit}
-                    value={getSaldoTo(item, entries ?? [])}
+                    value={data?.getSaldoTo(item) ?? 0}
                   />
                 </Flex>
               </AccordionHeader>
@@ -97,7 +100,7 @@ export default function SaldoId() {
 
   return (
     <Shell title="Saldo" text={data?.name}>
-      <Seo title={`Saldo: ${data?.name}`} />
+      <Seo title={`Saldo: ${data?.name ?? "Loading..."}`} />
       <Card maxWidth="max-w-full" marginTop="mt-6">
         <Title>Transactions</Title>
 
@@ -130,7 +133,7 @@ export default function SaldoId() {
                       ) : (
                         <SaldoBadge
                           debitLimit={data?.debitLimit}
-                          value={getSaldoTo(item, entries)}
+                          value={data?.getSaldoTo(item) ?? 0}
                         />
                       )}
                     </TableCell>
@@ -174,7 +177,7 @@ export default function SaldoId() {
       <Card maxWidth="max-w-full" marginTop="mt-6">
         <Title>Flow</Title>
         <LineChart
-          data={presentable ?? []}
+          data={saldoDayRange?.presentableDays ?? []}
           categories={["Saldo", "Daily change"]}
           colors={["blue", "gray"]}
           dataKey="Date"
@@ -187,7 +190,7 @@ export default function SaldoId() {
           <Title>Status</Title>
           <Text>Saldo</Text>
           <Tracking marginTop="mt-2">
-            {(presentable ?? []).map((item) => (
+            {(saldoDayRange?.presentableDays ?? []).map((item) => (
               <TrackingBlock
                 key={item.id}
                 color={getSaldoColor(item.Saldo, data?.debitLimit)}
@@ -201,7 +204,7 @@ export default function SaldoId() {
           <Title>Status</Title>
           <Text>Daily change</Text>
           <Tracking marginTop="mt-2">
-            {(presentable ?? []).map((item) => (
+            {(saldoDayRange?.presentableDays ?? []).map((item) => (
               <TrackingBlock
                 key={item.id}
                 color={getSaldoColor(item["Daily change"])}
