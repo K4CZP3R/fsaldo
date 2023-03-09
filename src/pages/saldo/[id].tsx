@@ -50,19 +50,22 @@ export default function SaldoId() {
   }, [data]);
 
   useEffect(() => {
-    const entries = data?.saldoEntries;
     if (!entries) return;
 
     const minDate = entries[0].date;
     const maxDate = entries[entries.length - 1].date;
 
-    let dayRange = new SaldoDayRange(minDate, maxDate);
+    let dayRange = new SaldoDayRange(
+      minDate,
+      maxDate,
+      (data?.debitLimit ?? 0) * -1
+    );
     entries.forEach((entry) => {
       dayRange.addEntry(entry);
     });
 
     setSaldoDayRange(dayRange);
-  }, [data]);
+  }, [entries, data?.debitLimit]);
 
   const isSmol = useMediaQuery(600);
 
@@ -123,6 +126,10 @@ export default function SaldoId() {
                 {entries.map((item) => (
                   <SaldoEntryRow
                     onChange={() => mutate()}
+                    onActiveToggle={() => {
+                      item.active = !item.active;
+                      setEntries([...entries]);
+                    }}
                     saldoId={data!.id}
                     key={item.id}
                     item={item}
@@ -130,11 +137,13 @@ export default function SaldoId() {
                     <TableCell>
                       {isLoading ? (
                         <Skeleton />
-                      ) : (
+                      ) : item.active ? (
                         <SaldoBadge
                           debitLimit={data?.debitLimit}
                           value={data?.getSaldoTo(item) ?? 0}
                         />
+                      ) : (
+                        <></>
                       )}
                     </TableCell>
                   </SaldoEntryRow>
@@ -178,8 +187,8 @@ export default function SaldoId() {
         <Title>Flow</Title>
         <LineChart
           data={saldoDayRange?.presentableDays ?? []}
-          categories={["Saldo", "Daily change"]}
-          colors={["blue", "gray"]}
+          categories={["Saldo", "Daily change", "Debit"]}
+          colors={["blue", "gray", "red"]}
           dataKey="Date"
           valueFormatter={(value) => StringHelper.valuta(value)}
         />

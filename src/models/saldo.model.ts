@@ -6,7 +6,7 @@ export interface DbSaldo {
   name: string;
   saldoEntry: DbSaldoEntry[];
   debitLimit?: number;
-};
+}
 
 export class Saldo {
   id: string;
@@ -27,16 +27,23 @@ export class Saldo {
   }
 
   public get saldoEntries(): SaldoEntry[] {
-    return cloneDeep(this.saldoEntry);
+    // return cloneDeep(this.saldoEntry);
+    return this.saldoEntry;
   }
 
-
   static fromDb(obj: DbSaldo): Saldo {
-    return new Saldo(obj.id, obj.name, obj.saldoEntry.map(e => SaldoEntry.fromDb(e)), obj.debitLimit);
+    return new Saldo(
+      obj.id,
+      obj.name,
+      obj.saldoEntry.map((e) => SaldoEntry.fromDb(e)),
+      obj.debitLimit
+    );
   }
 
   get endingSaldo(): number {
-    return this.saldoEntry.reduce((acc, e) => acc + e.amount, 0);
+    return this.saldoEntry
+      .filter((e) => e.active)
+      .reduce((acc, e) => acc + e.amount, 0);
   }
 
   getSaldoTo(item: SaldoEntry): number {
@@ -53,9 +60,11 @@ export class Saldo {
     let entriesBefore = entries.slice(0, index + 1);
 
     // Calculate saldo
-    entriesBefore.forEach((e) => {
-      saldo += e.amount;
-    });
+    entriesBefore
+      .filter((e) => e.active)
+      .forEach((e) => {
+        saldo += e.amount;
+      });
     return saldo;
   }
 
@@ -63,9 +72,8 @@ export class Saldo {
     return {
       id: this.id,
       name: this.name,
-      saldoEntry: this.saldoEntry.map(e => e.toDb()),
-      debitLimit: this.debitLimit
-    }
+      saldoEntry: this.saldoEntry.map((e) => e.toDb()),
+      debitLimit: this.debitLimit,
+    };
   }
 }
-
