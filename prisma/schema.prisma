@@ -33,7 +33,7 @@ model SaldoEntry {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   name    String
   amount  Float
-  date    String
+  date    Int
   saldoId String @db.ObjectId
   saldo   Saldo  @relation(fields: [saldoId], references: [id])
 }
