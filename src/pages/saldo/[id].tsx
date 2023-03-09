@@ -50,7 +50,7 @@ export default function SaldoId() {
   }, [data]);
 
   useEffect(() => {
-    if (!entries) return;
+    if (!entries || entries.length < 2) return;
 
     const minDate = entries[0].date;
     const maxDate = entries[entries.length - 1].date;
