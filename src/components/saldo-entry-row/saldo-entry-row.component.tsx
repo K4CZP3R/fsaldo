@@ -1,4 +1,3 @@
-import { SaldoEntry } from "@/models/saldo.model";
 import { TableCell, TableRow, Text, TextInput, Button } from "@tremor/react";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -7,9 +6,9 @@ import {
   updateSaldoEntry,
 } from "@/helpers/client-side.helper";
 import Skeleton from "react-loading-skeleton";
-import { strDate, valuta } from "@/helpers/string.helper";
 import NumberInput from "../number-input/number-input.compontent";
-import { FsaldoDate } from "@/helpers/fsaldo-date.helper";
+import { SaldoEntry } from "@/models/saldo-entry.model";
+import { StringHelper } from "@/helpers/string.helper";
 
 export type SaldoEntryRowProps = {
   saldoId: string;
@@ -21,9 +20,7 @@ export type SaldoEntryRowProps = {
 export default function SaldoEntryRow(props: SaldoEntryRowProps) {
   const [name, setName] = useState(props.item.name);
   const [amount, setAmount] = useState(props.item.amount);
-  const [date, setDate] = useState(
-    FsaldoDate.fromString(props.item.date).toDate()
-  );
+  const [date, setDate] = useState(props.item.date.toDate());
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -48,7 +45,7 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
       updateSaldoEntry(props.saldoId, props.item.id, {
         name,
         amount,
-        date: FsaldoDate.fromDate(date).toString(),
+        date: date.getTime(),
       })
         .then((res) => {
           props.onChange?.();
@@ -59,9 +56,9 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
         });
     } else {
       addEntryToSaldo(props.saldoId, {
-        name,
+        name: name,
         amount,
-        date: FsaldoDate.fromDate(date).toString(),
+        date: date.getTime(),
       })
         .then((res) => {
           props.onChange?.();
@@ -137,10 +134,10 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
       <TableRow>
         <TableCell>{name}</TableCell>
         <TableCell>
-          <Text>{valuta(amount)}</Text>
+          <Text>{StringHelper.valuta(amount)}</Text>
         </TableCell>
         <TableCell>
-          <Text>{strDate(props.item.date)}</Text>
+          <Text>{props.item.stringDate}</Text>
         </TableCell>
         {props.children}
         <TableCell>
