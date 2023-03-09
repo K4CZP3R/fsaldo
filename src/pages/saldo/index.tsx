@@ -19,8 +19,9 @@ import Modal from "react-modal";
 import Skeleton from "react-loading-skeleton";
 import { getEndingSaldo } from "@/helpers/saldo.helper";
 import { deleteSaldo, useGetSaldos } from "@/helpers/client-side.helper";
-import { valuta } from "@/helpers/string.helper";
 import { Saldo } from "@/models/saldo.model";
+import { StringHelper } from "@/helpers/string.helper";
+import Seo from "@/components/seo/seo.component";
 
 const customStyles = {
   content: {
@@ -49,6 +50,7 @@ export default function SaldoIndex() {
 
   return (
     <Shell title="Saldos" text="Create, view, delete your saldos. ">
+      <Seo title="Saldos" />
       {error && <Callout title="error" text={error.message} color="red" />}
       <Button
         text="Create saldo"
@@ -92,10 +94,12 @@ export default function SaldoIndex() {
         {data?.map((saldo) => (
           <Card key={saldo.id}>
             <Text>{saldo.name}</Text>
-            <Metric>{valuta(getEndingSaldo(saldo.saldoEntry))}</Metric>
+            <Metric>
+              {StringHelper.valuta(getEndingSaldo(saldo.saldoEntry))}
+            </Metric>
             <Text>
               {saldo.debitLimit
-                ? `Debit limit of ${valuta(saldo.debitLimit)}`
+                ? `Debit limit of ${StringHelper.valuta(saldo.debitLimit)}`
                 : "No debit limit"}
             </Text>
             <Footer>

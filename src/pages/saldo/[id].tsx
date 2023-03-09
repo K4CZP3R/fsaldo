@@ -1,5 +1,4 @@
 import Shell from "@/components/shell/shell.component";
-import { SaldoEntry } from "@/models/saldo.model";
 import {
   Text,
   Card,
@@ -37,8 +36,9 @@ import { useMediaQuery } from "@/helpers/media-query.helper";
 import SaldoBadge, {
   getSaldoColor,
 } from "@/components/badge/saldo-badge.component";
-import { date, strDate, valuta } from "@/helpers/string.helper";
-import { FsaldoDate } from "@/helpers/fsaldo-date.helper";
+import { SaldoEntry } from "@/models/saldo-entry.model";
+import { StringHelper } from "@/helpers/string.helper";
+import Seo from "@/components/seo/seo.component";
 
 export default function SaldoId() {
   const router = useRouter();
@@ -52,13 +52,7 @@ export default function SaldoId() {
   );
 
   useEffect(() => {
-    data?.saldoEntry.sort((a, b) => {
-      return (
-        FsaldoDate.fromString(a.date).toInt() -
-        FsaldoDate.fromString(b.date).toInt()
-      );
-    });
-    setEntries(data?.saldoEntry);
+    setEntries(data?.sortedSaldoEntry);
   }, [data]);
 
   useEffect(() => {
@@ -72,6 +66,7 @@ export default function SaldoId() {
   if (isSmol) {
     return (
       <Shell title="Saldo" text={data?.name}>
+        <Seo title={`Saldo: ${data?.name}`} />
         <AccordionList //The AccordionList is optional
           shadow={true}
           marginTop="mt-0"
@@ -81,7 +76,7 @@ export default function SaldoId() {
               <AccordionHeader>
                 <Flex>
                   <span>{item.name}</span>
-                  <span>{item.date}</span>
+                  <span>{item.stringDate}</span>
                   <SaldoBadge
                     debitLimit={data?.debitLimit}
                     value={getSaldoTo(item, entries ?? [])}
@@ -90,7 +85,7 @@ export default function SaldoId() {
               </AccordionHeader>
               <AccordionBody>
                 <Flex>
-                  <span>{valuta(item.amount)}</span>
+                  <span>{StringHelper.valuta(item.amount)}</span>
                 </Flex>
               </AccordionBody>
             </Accordion>
@@ -102,6 +97,7 @@ export default function SaldoId() {
 
   return (
     <Shell title="Saldo" text={data?.name}>
+      <Seo title={`Saldo: ${data?.name}`} />
       <Card maxWidth="max-w-full" marginTop="mt-6">
         <Title>Transactions</Title>
 
@@ -168,14 +164,7 @@ export default function SaldoId() {
         {entries && (
           <Button
             onClick={() => {
-              let newEntry: SaldoEntry = {
-                id: "",
-                amount: 0,
-                date: FsaldoDate.now().toString(),
-                name: "",
-              };
-
-              setEntries([...(entries ?? []), newEntry]);
+              setEntries([...(entries ?? []), SaldoEntry.newNow("", 0)]);
             }}
             text="Add new entry"
           ></Button>
@@ -189,7 +178,7 @@ export default function SaldoId() {
           categories={["Saldo", "Daily change"]}
           colors={["blue", "gray"]}
           dataKey="Date"
-          valueFormatter={(value) => valuta(value)}
+          valueFormatter={(value) => StringHelper.valuta(value)}
         />
       </Card>
 
@@ -200,9 +189,9 @@ export default function SaldoId() {
           <Tracking marginTop="mt-2">
             {(presentable ?? []).map((item) => (
               <TrackingBlock
-                key={item.Date}
+                key={item.id}
                 color={getSaldoColor(item.Saldo, data?.debitLimit)}
-                tooltip={`${item.Date}: ${valuta(item.Saldo)}`}
+                tooltip={`${item.Date}: ${StringHelper.valuta(item.Saldo)}`}
               />
             ))}
           </Tracking>
@@ -214,9 +203,11 @@ export default function SaldoId() {
           <Tracking marginTop="mt-2">
             {(presentable ?? []).map((item) => (
               <TrackingBlock
-                key={item.Date}
+                key={item.id}
                 color={getSaldoColor(item["Daily change"])}
-                tooltip={`${item.Date}: ${valuta(item["Daily change"])}`}
+                tooltip={`${item.Date}: ${StringHelper.valuta(
+                  item["Daily change"]
+                )}`}
               />
             ))}
           </Tracking>
