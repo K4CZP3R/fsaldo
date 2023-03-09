@@ -1,38 +1,34 @@
 import { ApiResponse } from "@/models/api-response.interface";
-import { Saldo, SaldoEntry, SaldoEntryUpdate } from "@/models/saldo.model";
+import { DbSaldoEntry, DbSaldoEntryUpdate, SaldoEntry } from "@/models/saldo-entry.model";
+import { DbSaldo, Saldo } from "@/models/saldo.model";
 import useSWR from "swr";
 
-function useSwrWrap<T>(apiPath: string | null) {
+function useSwrWrap<T, V>(apiPath: string | null, map: (data: T) => V) {
   return useSWR(apiPath, async (url: string) => {
     const resp = (await getRequest<T>(url)).data;
     if (!resp) throw new Error("No data");
-    return resp;
+    return map(resp);
   });
 }
 export function useGetSaldo(id: string | null) {
-  return useSwrWrap<Saldo>(id ? `/api/saldo/${id}` : null);
+  return useSwrWrap<DbSaldo, Saldo>(id ? `/api/saldo/${id}` : null, Saldo.fromDb)
 }
 
 export function useGetSaldos() {
-  return useSwrWrap<Saldo[]>("/api/saldo");
+  return useSwrWrap<DbSaldo[], Saldo[]>("/api/saldo", (saldos) => saldos.map(Saldo.fromDb));
 }
 
 export async function deleteSaldo(id: string): Promise<Saldo | undefined> {
-  const response = await getRequest<Saldo>(`/api/saldo/${id}`, "DELETE");
-  return response.data;
+  const response = await getRequest<DbSaldo>(`/api/saldo/${id}`, "DELETE");
+  return response.data ? Saldo.fromDb(response.data) : undefined;
 }
-
-// export async function getSaldo(id: string): Promise<Saldo | undefined> {
-//   const response = await getRequest<Saldo>(`/api/saldo/${id}`);
-//   return response.data;
-// }
 
 export async function updateSaldo(
   id: string,
   name: string,
   debitLimit: number
 ): Promise<Saldo | undefined> {
-  const response = await dataRequest<Saldo>(
+  const response = await dataRequest<DbSaldo>(
     `/api/saldo/${id}`,
     {
       saldo: {
@@ -42,59 +38,59 @@ export async function updateSaldo(
     },
     "PUT"
   );
-  return response.data;
+  return response.data ? Saldo.fromDb(response.data) : undefined;
 }
 
 export async function createSaldo(
   name: string,
   debitLimit: number
 ): Promise<Saldo | undefined> {
-  const response = await dataRequest<Saldo>(`/api/saldo`, { name, debitLimit });
-  return response.data;
+  const response = await dataRequest<DbSaldo>(`/api/saldo`, { name, debitLimit });
+  return response.data ? Saldo.fromDb(response.data) : undefined;
 }
 
 export async function addEntryToSaldo(
   saldoId: string,
-  entry: SaldoEntryUpdate
-): Promise<Saldo | undefined> {
-  const response = await dataRequest<Saldo>(`/api/saldo/${saldoId}/entry`, {
+  entry: DbSaldoEntryUpdate
+): Promise<SaldoEntry | undefined> {
+  const response = await dataRequest<DbSaldoEntry>(`/api/saldo/${saldoId}/entry`, {
     saldoEntry: entry,
   });
-  return response.data;
+  return response.data ? SaldoEntry.fromDb(response.data) : undefined;
 }
 
 export async function getSaldoEntry(
   saldoId: string,
   entryId: string
 ): Promise<SaldoEntry | undefined> {
-  const response = await getRequest<SaldoEntry>(
+  const response = await getRequest<DbSaldoEntry>(
     `/api/saldo/${saldoId}/entry/${entryId}`
   );
-  return response.data;
+  return response.data ? SaldoEntry.fromDb(response.data) : undefined;
 }
 
 export async function updateSaldoEntry(
   saldoId: string,
   entryId: string,
-  entry: SaldoEntryUpdate
+  entry: DbSaldoEntryUpdate
 ): Promise<SaldoEntry | undefined> {
-  const response = await dataRequest<SaldoEntry>(
+  const response = await dataRequest<DbSaldoEntry>(
     `/api/saldo/${saldoId}/entry/${entryId}`,
     { saldoEntry: entry },
     "PUT"
   );
-  return response.data;
+  return response.data ? SaldoEntry.fromDb(response.data) : undefined;
 }
 
 export async function deleteSaldoEntry(
   saldoId: string,
   entryId: string
 ): Promise<SaldoEntry | undefined> {
-  const response = await getRequest<SaldoEntry>(
+  const response = await getRequest<DbSaldoEntry>(
     `/api/saldo/${saldoId}/entry/${entryId}`,
     "DELETE"
   );
-  return response.data;
+  return response.data ? SaldoEntry.fromDb(response.data) : undefined;
 }
 
 async function dataRequest<T>(
@@ -126,4 +122,12 @@ async function getRequest<T>(
   }
   const data = await response.json();
   return data as ApiResponse<T>;
+}
+
+export const SiteName = "fsaldo"
+
+
+export function getSiteName(extra: string) {
+  // return `${PageName} ${extra ? `| ${extra}` : ""}`;
+  return `${extra ? `${extra} | ` : ""} ${SiteName}`;
 }
