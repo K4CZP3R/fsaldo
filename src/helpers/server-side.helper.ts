@@ -1,4 +1,3 @@
-import { ApiResponse } from "@/models/api-response.interface";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
