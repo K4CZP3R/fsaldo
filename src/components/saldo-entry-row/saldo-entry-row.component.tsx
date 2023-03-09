@@ -14,6 +14,7 @@ export type SaldoEntryRowProps = {
   saldoId: string;
   item: SaldoEntry;
   onChange?: () => void;
+  onActiveToggle?: (item: SaldoEntry) => void;
   children?: React.ReactNode;
 };
 
@@ -134,7 +135,9 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
       <TableRow>
         <TableCell>{name}</TableCell>
         <TableCell>
-          <Text>{StringHelper.valuta(amount)}</Text>
+          <Text color={amount > 0 ? undefined : "red"}>
+            {StringHelper.valuta(amount)}
+          </Text>
         </TableCell>
         <TableCell>
           <Text>{props.item.stringDate}</Text>
@@ -155,6 +158,16 @@ export default function SaldoEntryRow(props: SaldoEntryRowProps) {
             size="sm"
             text="Delete"
             color="red"
+          />
+
+          <Button
+            onClick={() => {
+              props.onActiveToggle?.(props.item);
+            }}
+            variant="light"
+            size="sm"
+            text={props.item.active ? "Deactivate" : "Activate"}
+            color={props.item.active ? "yellow" : "lime"}
           />
         </TableCell>
       </TableRow>
