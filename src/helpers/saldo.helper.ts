@@ -1,20 +1,24 @@
-import { SaldoEntry } from "@/models/saldo.model";
-import { FsaldoDate } from "./fsaldo-date.helper";
+import { SaldoEntry } from "@/models/saldo-entry.model";
+import { Dayjs } from "dayjs";
+import { cloneDeep } from "lodash";
+import { StringHelper } from "./string.helper";
 
 function deepCopySort(entries: SaldoEntry[]) {
-  let deepCopy = JSON.parse(JSON.stringify(entries)) as SaldoEntry[];
+  let deepCopy = cloneDeep(entries);
   deepCopy.sort((a, b) => {
     return (
-      FsaldoDate.fromString(a.date).toInt() -
-      FsaldoDate.fromString(b.date).toInt()
+      a.isAfter(b) ? 1 : -1
     );
   });
   return deepCopy;
 }
 function deepCopySortDays(days: SaldoDay[]) {
-  let deepCopy = JSON.parse(JSON.stringify(days)) as SaldoDay[];
+  let deepCopy = cloneDeep(days);
+
   deepCopy.sort((a, b) => {
-    return a.date.toInt() - b.date.toInt();
+    return (
+      a.date.isAfter(b.date) ? 1 : -1
+    );
   });
   return deepCopy;
 }
@@ -49,6 +53,7 @@ export function getSaldoTo(item: SaldoEntry, entries: SaldoEntry[]) {
 }
 
 export type SaldoDayPresentable = {
+  id: string;
   Date: string;
   "Daily change": number;
   Saldo: number;
@@ -56,7 +61,8 @@ export type SaldoDayPresentable = {
 };
 
 type SaldoDay = {
-  date: FsaldoDate;
+  id: string;
+  date: Dayjs;
   entries: SaldoEntry[];
 };
 
@@ -64,8 +70,6 @@ export function toSaldoDayPresentable(days: SaldoDay[]): SaldoDayPresentable[] {
   let presentable: SaldoDayPresentable[] = [];
 
   let sorted = deepCopySortDays(days);
-
-  console.log("This is a test, ik heb dit in VR geschreven1 :O");
 
   let saldo = 0;
   for (let day of sorted) {
@@ -76,7 +80,8 @@ export function toSaldoDayPresentable(days: SaldoDay[]): SaldoDayPresentable[] {
     saldo += dailyChange;
 
     presentable.push({
-      Date: day.date.toString(),
+      id: day.id,
+      Date: StringHelper.date(day.date),
       "Daily change": dailyChange,
       Saldo: saldo,
       Transactions: day.entries.length,
@@ -95,15 +100,19 @@ export function addEmptySaldoDays(days: SaldoDay[]): SaldoDay[] {
 
   // Fill in missing days
   let currentDate = firstDate;
-  while (currentDate.toInt() <= lastDate.toInt()) {
-    if (!sorted.find((e) => e.date.toInt() === currentDate.toInt())) {
+  while (currentDate.unix() <= lastDate.unix()) {
+    if (!sorted.find((e) => e.date.isSame(currentDate, "day"))) {
       sorted.push({
+        id: currentDate.format("DD.MM.YYYY"),
         date: currentDate,
         entries: [],
       });
     }
 
-    currentDate.setDate(currentDate.getDate() + 1);
+
+
+    // Advance dayjs object by one day
+    currentDate = currentDate.add(1, "day");
   }
 
   // Sort again
@@ -117,11 +126,12 @@ export function toSaldoDays(entries: SaldoEntry[]): SaldoDay[] {
   let sorted = deepCopySort(entries);
 
   for (let entry of sorted) {
-    let saldoDayEntry = saldoDay.find((e) => e.date === entry.date);
+    let saldoDayEntry = saldoDay.find((e) => e.date.isSame(entry.date, "day"));
     if (saldoDayEntry) {
       saldoDayEntry.entries.push(entry);
     } else {
       saldoDay.push({
+        id: `${entry.date}${entry.id}`,
         date: entry.date,
         entries: [entry],
       });
