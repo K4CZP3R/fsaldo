@@ -35,6 +35,9 @@ export default async function handler(
             where: {
               id: saldoId as string,
             },
+            include: {
+              saldoEntry: true,
+            },
             data: req.body.saldo,
           }),
         });
@@ -43,6 +46,9 @@ export default async function handler(
           data: await prisma.saldo.delete({
             where: {
               id: saldoId as string,
+            },
+            include: {
+              saldoEntry: true,
             },
           }),
         });

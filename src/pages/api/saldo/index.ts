@@ -35,6 +35,9 @@ export default async function handler(
               name: req.body.name,
               debitLimit: req.body.debitLimit,
             },
+            include: {
+              saldoEntry: true,
+            },
           }),
         });
       default:
