@@ -1,6 +1,4 @@
-import { Inter } from "next/font/google";
-import styles from "@/styles/Home.module.css";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Shell from "@/components/shell/shell.component";
 import { HomeIcon, ArrowRightIcon } from "@heroicons/react/24/solid";
 
@@ -13,18 +11,11 @@ import {
   Text,
   Footer,
   ButtonInline,
-  Callout,
-  Flex,
 } from "@tremor/react";
 import { useRouter } from "next/router";
+import Seo from "@/components/seo/seo.component";
 
 const cards = [
-  // {
-  //   title: "Create a new saldo item",
-  //   text: "Create a new saldo item",
-  //   icon: HomeIcon,
-  //   path: "/new",
-  // },
   {
     title: "View all saldo items",
     text: "View all saldo items",
@@ -48,6 +39,7 @@ export default function Home() {
 
   return (
     <Shell title="Home" text={`Welcome ${session.user?.name},`}>
+      <Seo title="Home" />
       <ColGrid numColsMd={2} gapX="gap-x-6" gapY="gap-y-6" marginTop="mt-6">
         {cards.map((card) => (
           <Card key={card.title}>
