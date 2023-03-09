@@ -18,7 +18,9 @@ export class SaldoDay {
   }
 
   get dailySaldo(): number {
-    return this.entries.reduce((acc, e) => acc + e.amount, 0);
+    return this.entries
+      .filter((e) => e.active)
+      .reduce((acc, e) => acc + e.amount, 0);
   }
 
   get transactions(): number {
@@ -31,17 +33,20 @@ export type SaldoDayPresentable = {
   Saldo: number;
   Date: string;
   "Daily change": number;
+  Debit: number;
 };
 
 export class SaldoDayRange {
   start: dayjs.Dayjs;
   end: dayjs.Dayjs;
+  debit: number;
 
   days: SaldoDay[];
 
-  constructor(start: dayjs.Dayjs, end: dayjs.Dayjs) {
+  constructor(start: dayjs.Dayjs, end: dayjs.Dayjs, debit: number) {
     this.start = start;
     this.end = end;
+    this.debit = debit;
     this.days = [];
 
     for (let i = 0; i <= this.end.diff(this.start, "day"); i++) {
@@ -60,6 +65,7 @@ export class SaldoDayRange {
         Saldo: saldo,
         Date: day.date.format("YYYY-MM-DD"),
         "Daily change": day.dailySaldo,
+        Debit: this.debit,
       });
     }
 
