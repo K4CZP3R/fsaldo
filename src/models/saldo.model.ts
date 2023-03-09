@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { cloneDeep } from "lodash";
 import { DbSaldoEntry, SaldoEntry } from "./saldo-entry.model";
 
@@ -44,6 +45,23 @@ export class Saldo {
     return this.saldoEntry
       .filter((e) => e.active)
       .reduce((acc, e) => acc + e.amount, 0);
+  }
+
+  get todaySaldo(): number {
+    // Get last entry of today
+    let today = dayjs();
+
+    // Get last entry before end of today
+    let lastEntry = this.saldoEntry
+      .filter((e) => e.active)
+      .filter((e) => e.date.isBefore(today.endOf("day")))
+      .sort(SaldoEntry.sortFunction)
+      .pop();
+
+    if (lastEntry) {
+      return this.getSaldoTo(lastEntry);
+    }
+    return 0;
   }
 
   getSaldoTo(item: SaldoEntry): number {

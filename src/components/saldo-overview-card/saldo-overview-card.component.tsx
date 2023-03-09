@@ -48,7 +48,7 @@ export default function SaldoOverviewCard(props: SaldoOverviewCardProps) {
   return (
     <Card key={props.saldo.id}>
       <Text>{props.saldo.name}</Text>
-      <Metric>{StringHelper.valuta(props.saldo.endingSaldo)}</Metric>
+      <Metric>{StringHelper.valuta(props.saldo.todaySaldo)}</Metric>
       <Text>
         {props.saldo.debitLimit
           ? `Debit limit of ${StringHelper.valuta(props.saldo.debitLimit)}`
