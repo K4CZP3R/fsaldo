@@ -1,4 +1,4 @@
-import { valuta } from "@/helpers/string.helper";
+import { StringHelper } from "@/helpers/string.helper";
 import {
   ArrowDownIcon,
   ArrowRightIcon,
@@ -13,11 +13,12 @@ export type BadgeProps = {
 };
 
 export function getSaldoColor(value: number, debit: number = 0) {
-  if (debit !== 0 && value <= debit * -1) return "red";
+  if (value <= debit * -1) return "red";
   if (value === 0) return "zinc";
   if (value > 0) return "green";
   if (value < 0) return "amber";
-  return "gray";
+
+  return "zinc";
 }
 
 export function getSaldoIcon(value: number, debit: number = 0) {
@@ -31,7 +32,7 @@ export default function SaldoBadge(props: BadgeProps) {
   return (
     <TremorBadge
       color={getSaldoColor(props.value, props.debitLimit)}
-      text={valuta(props.value)}
+      text={StringHelper.valuta(props.value)}
       icon={getSaldoIcon(props.value, props.debitLimit)}
     ></TremorBadge>
   );
