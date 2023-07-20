@@ -1,0 +1,11 @@
+.formContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.formContainer > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
